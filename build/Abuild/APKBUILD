@@ -1,0 +1,46 @@
+# Contributor: Leo <thinkabit.ukim@gmail.com>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+# QNX Maintainer: Felix Xing <fxing@qnx.com>
+pkgname=libnotify
+pkgver=0.8.6
+pkgrel=0
+pkgdesc="Desktop notification library"
+url="https://gitlab.gnome.org/GNOME/libnotify"
+arch="all"
+options="!check"
+license="LGPL-2.1-or-later"
+depends="gtk3"
+makedepends="
+    dbus-dev
+    gdk-pixbuf-dev
+    gobject-introspection-dev
+    gtk3-dev
+    ninja
+    meson
+    "
+subpackages="$pkgname-dev"
+source="https://download.gnome.org/sources/libnotify/${pkgver%.*}/libnotify-$pkgver.tar.xz"
+
+build() {
+    meson \
+        --prefix=/usr \
+        -Db_lto=false \
+        -Dtests="$(want_check && echo true || echo false)"\
+        -Dintrospection=enabled \
+        -Dgtk_doc=false \
+        -Dman=false \
+        output
+    meson compile -C output
+}
+
+check() {
+    meson test --print-errorlogs -C output
+}
+
+package() {
+    DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+sha512sums="
+6e566f5907cfd7d623d58f5aa22d547271feb7e52bf28e463ecb98a763d6f7ad38cacc473d65e6f4a7e44c0514ab008078042e56a8b61edb719b9a1d192c2e34  libnotify-0.8.6.tar.xz
+"
